@@ -55,6 +55,27 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString()
     }
 
+    // 🔥 N8N Webhook Integration
+    const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL
+
+    if (n8nWebhookUrl) {
+      try {
+        await fetch(n8nWebhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            event: 'new_lead',
+            data: leadData,
+            timestamp: new Date().toISOString()
+          })
+        })
+      } catch (error) {
+        console.error('Error sending webhook to n8n:', error)
+      }
+    }
+
     // Here you would typically save to database
     // For now, we'll just return the data
 

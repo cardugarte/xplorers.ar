@@ -1,10 +1,65 @@
+"use client"
+
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { GradientText } from "@/components/ui/gradient-text"
 import { SectionContainer } from "@/components/ui/section-container"
-import { Bot, Phone, Mail, ArrowRight, Sparkles, Star, Zap } from "lucide-react"
+import { Bot, Phone, Mail, ArrowRight, Sparkles, Star, Zap, CheckCircle, AlertCircle } from "lucide-react"
 
 export function Footer() {
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [phone, setPhone] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!name.trim()) {
+      setMessage({ type: 'error', text: 'Por favor ingresa tu nombre' })
+      return
+    }
+
+    if (!email.trim()) {
+      setMessage({ type: 'error', text: 'Por favor ingresa tu email' })
+      return
+    }
+
+    setIsLoading(true)
+    setMessage(null)
+
+    try {
+      const response = await fetch('/api/lead', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          phone: phone.trim() || undefined,
+          source: 'footer'
+        }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setMessage({ type: 'success', text: '¡Perfecto! Te contactaremos pronto.' })
+        setName('')
+        setEmail('')
+        setPhone('')
+      } else {
+        setMessage({ type: 'error', text: data.message || 'Error al enviar. Intenta nuevamente.' })
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Error de conexión. Intenta nuevamente.' })
+    } finally {
+      setIsLoading(false)
+    }
+  }
   return (
     <footer className="bg-gradient-to-br from-[#0a0f1a] via-[#1a2332] to-[#0f1419] border-t border-white/10 relative overflow-hidden">
       {/* Floating elements similar to Hero */}
@@ -50,26 +105,72 @@ export function Footer() {
                 Contacto directo en <span className="text-amber-300 font-medium">menos de 24h</span>
               </p>
 
-              {/* Form with email and phone */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-2xl mx-auto">
-                <div className="flex-1">
-                  <Input
-                    placeholder="Email empresarial"
-                    type="email"
-                    className="bg-[#1a2332]/80 backdrop-blur-sm border-white/10 text-white placeholder:text-[#8fa3c7] focus:border-cyan-400/50 transition-all duration-300"
-                  />
+              {/* Form with name, email and phone */}
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-2xl mx-auto">
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Tu nombre"
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      disabled={isLoading}
+                      className="bg-[#1a2332]/80 backdrop-blur-sm border-white/10 text-white placeholder:text-[#8fa3c7] focus:border-cyan-400/50 transition-all duration-300 disabled:opacity-50"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Email empresarial"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={isLoading}
+                      className="bg-[#1a2332]/80 backdrop-blur-sm border-white/10 text-white placeholder:text-[#8fa3c7] focus:border-cyan-400/50 transition-all duration-300 disabled:opacity-50"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Teléfono"
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      disabled={isLoading}
+                      className="bg-[#1a2332]/80 backdrop-blur-sm border-white/10 text-white placeholder:text-[#8fa3c7] focus:border-cyan-400/50 transition-all duration-300 disabled:opacity-50"
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="bg-gradient-to-r from-[#0ea5ea] to-[#1cc2e7] hover:from-[#1cc2e7] hover:to-[#0ea5ea] text-white px-6 shadow-lg shadow-cyan-500/25 transition-all duration-300 hover:scale-105 hover:shadow-cyan-500/40 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  >
+                    {isLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Enviando...
+                      </>
+                    ) : (
+                      <>
+                        Solicitar Análisis <ArrowRight className="w-4 h-4 ml-2" />
+                      </>
+                    )}
+                  </Button>
                 </div>
-                <div className="flex-1">
-                  <Input
-                    placeholder="Número de teléfono"
-                    type="tel"
-                    className="bg-[#1a2332]/80 backdrop-blur-sm border-white/10 text-white placeholder:text-[#8fa3c7] focus:border-cyan-400/50 transition-all duration-300"
-                  />
-                </div>
-                <Button className="bg-gradient-to-r from-[#0ea5ea] to-[#1cc2e7] hover:from-[#1cc2e7] hover:to-[#0ea5ea] text-white px-6 shadow-lg shadow-cyan-500/25 transition-all duration-300 hover:scale-105 hover:shadow-cyan-500/40 whitespace-nowrap">
-                  Solicitar Análisis <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </div>
+
+                {/* Message display */}
+                {message && (
+                  <div className={`flex items-center justify-center gap-2 text-sm p-3 rounded-lg max-w-2xl mx-auto ${message.type === 'success'
+                    ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                    : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                    }`}>
+                    {message.type === 'success' ? (
+                      <CheckCircle className="w-4 h-4" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4" />
+                    )}
+                    {message.text}
+                  </div>
+                )}
+              </form>
 
               <p className="text-xs text-[#8fa3c7] flex items-center justify-center gap-4">
                 <span>🔒 Información confidencial</span>

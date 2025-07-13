@@ -53,7 +53,13 @@ export function Header() {
       <div className="flex items-center gap-4">
         <Search className="w-5 h-5 text-[#b4c6e7] cursor-pointer hover:text-cyan-400 transition-all duration-300 hover:scale-110 hidden sm:block" />
         <Satellite className="w-5 h-5 text-[#b4c6e7] cursor-pointer hover:text-purple-400 transition-all duration-300 hover:scale-110 animate-spin-slow hidden sm:block" />
-        <Button className="bg-gradient-to-r from-[#0ea5ea] to-[#1cc2e7] hover:from-[#1cc2e7] hover:to-[#0ea5ea] text-white px-6 shadow-lg shadow-cyan-500/25 transition-all duration-300 hover:scale-105 hover:shadow-cyan-500/40 hidden sm:flex">
+        <Button
+          onClick={() => {
+            const footer = document.querySelector('footer');
+            footer?.scrollIntoView({ behavior: 'smooth' });
+          }}
+          className="bg-gradient-to-r from-[#0ea5ea] to-[#1cc2e7] hover:from-[#1cc2e7] hover:to-[#0ea5ea] text-white px-6 shadow-lg shadow-cyan-500/25 transition-all duration-300 hover:scale-105 hover:shadow-cyan-500/40 hidden sm:flex"
+        >
           Consulta Gratis
         </Button>
 
@@ -77,7 +83,16 @@ export function Header() {
                 {item.label}
               </a>
             ))}
-            <Button className="bg-gradient-to-r from-[#0ea5ea] to-[#1cc2e7] text-white mt-4">Consulta Gratis</Button>
+            <Button
+              onClick={() => {
+                const footer = document.querySelector('footer');
+                footer?.scrollIntoView({ behavior: 'smooth' });
+                setIsMenuOpen(false);
+              }}
+              className="bg-gradient-to-r from-[#0ea5ea] to-[#1cc2e7] text-white mt-4"
+            >
+              Consulta Gratis
+            </Button>
           </nav>
         </div>
       )}
